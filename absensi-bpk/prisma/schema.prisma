@@ -1,0 +1,29 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Karyawan {
+  id        Int       @id @default(autoincrement())
+  nama      String
+  password  String    
+  absensi   Absensi[] 
+}
+
+model Absensi {
+  id          Int       @id @default(autoincrement())
+  karyawanId  Int
+  waktuMasuk  DateTime  @default(now())
+  waktuKeluar DateTime? // Tanda tanya (?) berarti boleh kosong (null)
+  fotoMasuk    String
+  fotoKeluar   String?
+  karyawan    Karyawan  @relation(fields: [karyawanId], references: [id])
+}
