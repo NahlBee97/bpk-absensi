@@ -11,19 +11,20 @@ datasource db {
   provider = "sqlite"
 }
 
-model Karyawan {
+model Users {
   id        Int       @id @default(autoincrement())
   nama      String
-  password  String    
+  password  String
+  role      String @default("user")
   absensi   Absensi[] 
 }
 
 model Absensi {
   id          Int       @id @default(autoincrement())
-  karyawanId  Int
+  userId  Int
   waktuMasuk  DateTime  @default(now())
   waktuKeluar DateTime? // Tanda tanya (?) berarti boleh kosong (null)
   fotoMasuk    String
   fotoKeluar   String?
-  karyawan    Karyawan  @relation(fields: [karyawanId], references: [id])
+  users    Users  @relation(fields: [userId], references: [id])
 }
