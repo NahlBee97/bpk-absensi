@@ -6,7 +6,7 @@ const secretKey = new TextEncoder().encode(
   process.env.JWT_SECRET || "rahasia-perusahaan-cv-bisnis-pro",
 );
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // Hanya jalankan middleware ini jika user mencoba mengakses halaman /admin
   if (request.nextUrl.pathname.startsWith("/admin")) {
     // Ambil karcis (cookie)
