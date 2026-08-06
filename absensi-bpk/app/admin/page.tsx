@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Camera, ChevronLeft, FileSpreadsheet } from "lucide-react";
+import { Camera, ChevronLeft, FileSpreadsheet, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import * as XLSX from "xlsx";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -11,6 +12,9 @@ export default function AdminDashboard() {
   // State untuk menampung data dari API dan status loading
   const [historyData, setHistoryData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // State untuk modal foto
+  const [selectedRow, setSelectedRow] = useState<any>(null);
 
   // Fungsi format tanggal (MM/DD/YY)
   const formatDateMMDDYY = (dateString: any) => {
@@ -60,6 +64,72 @@ export default function AdminDashboard() {
     }
   };
 
+  // Fungsi export data absensi ke Excel
+  const handleExportExcel = () => {
+    if (historyData.length === 0) return;
+
+    const dataToExport = historyData.map((row) => {
+      const statusKehadiran =
+        row.waktuKeluar === null || row.waktuKeluar === "-"
+          ? "Sedang Bekerja"
+          : "Selesai";
+
+      return {
+        ID: `#${String(row.id).padStart(3, "0")}`,
+        "Nama Karyawan": formatTitleCase(row.nama || row.name),
+        "Hari, Tanggal": row.waktuMasuk
+          ? new Date(row.waktuMasuk).toLocaleDateString("id-ID", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })
+          : "-",
+        "Waktu Masuk": row.waktuMasuk
+          ? new Date(row.waktuMasuk).toLocaleTimeString("id-ID", {
+              hour: "2-digit",
+              minute: "2-digit",
+            })
+          : "-",
+        "Waktu Keluar":
+          row.waktuKeluar && row.waktuKeluar !== "-"
+            ? new Date(row.waktuKeluar).toLocaleTimeString("id-ID", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })
+            : "-",
+        Status: statusKehadiran,
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+
+    // Atur lebar kolom biar rapi
+    worksheet["!cols"] = [
+      { wch: 8 },
+      { wch: 25 },
+      { wch: 30 },
+      { wch: 14 },
+      { wch: 14 },
+      { wch: 16 },
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Riwayat Kehadiran");
+
+    const today = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(workbook, `Riwayat_Kehadiran_${today}.xlsx`);
+  };
+
+  // Fungsi buka modal foto
+  const handleShowPhoto = (row: any) => {
+    setSelectedRow(row);
+  };
+
+  const closePhotoModal = () => setSelectedRow(null);
+
+  console.log(selectedRow);
+
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 font-sans">
       {/* Navbar Admin */}
@@ -96,7 +166,11 @@ export default function AdminDashboard() {
               <p className="text-slate-500">Pantau absensi harian karyawan.</p>
             </div>
 
-            <button className="flex items-center gap-2 px-4 py-2 text-white rounded-lg shadow hover:opacity-90 transition-opacity bg-accent">
+            <button
+              onClick={handleExportExcel}
+              disabled={historyData.length === 0}
+              className="flex items-center gap-2 px-4 py-2 text-white rounded-lg shadow hover:opacity-90 transition-opacity bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               <FileSpreadsheet size={20} />
               Export to Excel
             </button>
@@ -157,12 +231,15 @@ export default function AdminDashboard() {
                           </td>
                           <td className="p-4 text-slate-600 font-mono">
                             {row.waktuMasuk
-                              ? new Date(row.waktuMasuk).toLocaleDateString("id-ID", {
-                                  weekday: "long",
-                                  year: "numeric",
-                                  month: "long",
-                                  day: "numeric",
-                                })
+                              ? new Date(row.waktuMasuk).toLocaleDateString(
+                                  "id-ID",
+                                  {
+                                    weekday: "long",
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                  },
+                                )
                               : "-"}
                           </td>
                           <td className="p-4 text-slate-600">
@@ -194,6 +271,7 @@ export default function AdminDashboard() {
                           </td>
                           <td className="p-4 flex justify-center">
                             <button
+                              onClick={() => handleShowPhoto(row)}
                               className="w-10 h-10 bg-slate-200 rounded border border-slate-300 flex items-center justify-center text-slate-400 text-xs hover:bg-slate-300 transition-colors"
                               title="Lihat Foto"
                             >
@@ -229,6 +307,83 @@ export default function AdminDashboard() {
           </div>
         </div>
       </main>
+
+      {/* Modal Foto Masuk & Keluar */}
+      {selectedRow && (
+        <div
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4"
+          onClick={closePhotoModal}
+        >
+          <div
+            className="bg-white rounded-xl shadow-lg max-w-2xl w-full p-6 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={closePhotoModal}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-700"
+            >
+              <X size={22} />
+            </button>
+
+            <h3 className="text-lg font-bold text-slate-800 mb-1">
+              Foto Absensi
+            </h3>
+            <p className="text-sm text-slate-500 mb-4">
+              {formatTitleCase(selectedRow.nama || selectedRow.name)} —{" "}
+              {selectedRow.waktuMasuk
+                ? new Date(selectedRow.waktuMasuk).toLocaleDateString("id-ID", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })
+                : "-"}
+            </p>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs font-semibold text-slate-500 uppercase mb-2">
+                  Foto Masuk
+                </p>
+                <div className="aspect-square bg-slate-100 rounded-lg overflow-hidden flex items-center justify-center border border-slate-200">
+                  {selectedRow.fotoMasuk ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={selectedRow.fotoMasuk}
+                      alt="Foto Masuk"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-xs text-slate-400">
+                      Tidak ada foto
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold text-slate-500 uppercase mb-2">
+                  Foto Keluar
+                </p>
+                <div className="aspect-square bg-slate-100 rounded-lg overflow-hidden flex items-center justify-center border border-slate-200">
+                  {selectedRow.fotoKeluar ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={selectedRow.fotoKeluar}
+                      alt="Foto Keluar"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-xs text-slate-400">
+                      Tidak ada foto
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

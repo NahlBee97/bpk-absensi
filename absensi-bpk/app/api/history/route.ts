@@ -25,6 +25,8 @@ export async function GET() {
         id: absen.id,
         nama: absen.users.nama,
         tanggal: formattedDate,
+        fotoMasuk: absen.fotoMasuk,
+        fotoKeluar: absen.fotoKeluar,
         waktuMasuk: absen.waktuMasuk,
         waktuKeluar: absen.waktuKeluar || "-",
       };
