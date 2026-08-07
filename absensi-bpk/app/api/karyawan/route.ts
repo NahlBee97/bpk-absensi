@@ -87,8 +87,11 @@ export async function POST(request: Request) {
 // ==========================================
 export async function PUT(request: Request) {
   try {
+    // Ambil id dari dynamic route params
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
     const body = await request.json();
-    const { id, nama, password, role } = body;
+    const { nama, password, role } = body;
 
     if (!id) {
       return NextResponse.json(
