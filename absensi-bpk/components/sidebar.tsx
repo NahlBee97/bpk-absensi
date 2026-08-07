@@ -14,12 +14,14 @@ import {
   CheckCircle2,
   XCircle,
   RotateCcw,
+  History,
 } from "lucide-react";
 import { useRouter, usePathname } from "next/navigation";
 import { useRef, useState } from "react";
 
 // Utility: delay promise
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const delay = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));
 
 type ProcessStatus = "idle" | "processing" | "success" | "error";
 type LogoutStepKey = "ending" | "clearing" | "redirecting";
@@ -65,7 +67,8 @@ export const Sidebar = () => {
 
   // ================= STATE: MODAL PROSES LOGOUT =================
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
-  const [logoutStatus, setLogoutStatus] = useState<ProcessStatus>("idle");
+  const [logoutStatus, setLogoutStatus] =
+    useState<ProcessStatus>("idle");
   const [logoutStepIndex, setLogoutStepIndex] = useState(0);
   const [logoutResultMessage, setLogoutResultMessage] = useState("");
   const logoutRunId = useRef(0);
@@ -78,17 +81,16 @@ export const Sidebar = () => {
     setLogoutResultMessage("");
     setLogoutModalOpen(true);
 
-    // Tembak request logout di background
     const apiPromise = axios
       .post("/api/auth/logout")
       .then(() => ({ ok: true as const }))
       .catch((err) => ({
         ok: false as const,
-        message: err?.response?.data?.message || "Gagal terhubung ke server",
+        message:
+          err?.response?.data?.message || "Gagal terhubung ke server",
       }));
 
     try {
-      // Tahap 1: Mengakhiri Sesi — tunggu hasil API di sini
       setLogoutStepIndex(0);
       const [apiResult] = await Promise.all([
         apiPromise,
@@ -102,17 +104,14 @@ export const Sidebar = () => {
         return;
       }
 
-      // Tahap 2: Membersihkan Data Lokal
       setLogoutStepIndex(1);
       await delay(LOGOUT_STEP_DURATIONS.clearing);
       if (runId !== logoutRunId.current) return;
 
-      // Tahap 3: Mengalihkan Halaman
       setLogoutStepIndex(2);
       await delay(LOGOUT_STEP_DURATIONS.redirecting);
       if (runId !== logoutRunId.current) return;
 
-      // Sukses
       setLogoutStatus("success");
       setLogoutResultMessage("Anda telah keluar dari sistem");
 
@@ -140,21 +139,31 @@ export const Sidebar = () => {
     setLogoutResultMessage("");
   };
 
-  const menuItems: { key: MenuKey; label: string; icon: any; link: string }[] =
-    [
-      {
-        key: "dashboard",
-        label: "Dashboard",
-        icon: LayoutDashboard,
-        link: "/admin",
-      },
-      {
-        key: "karyawan",
-        label: "Karyawan",
-        icon: Users,
-        link: "/admin/karyawan",
-      },
-    ];
+  const menuItems: {
+    key: MenuKey;
+    label: string;
+    icon: any;
+    link: string;
+  }[] = [
+    {
+      key: "dashboard",
+      label: "Dashboard",
+      icon: LayoutDashboard,
+      link: "/admin",
+    },
+    {
+      key: "riwayat",
+      label: "Riwayat Kehadiran",
+      icon: History,
+      link: "/admin/riwayat",
+    },
+    {
+      key: "karyawan",
+      label: "Karyawan",
+      icon: Users,
+      link: "/admin/karyawan",
+    },
+  ];
 
   return (
     <>
@@ -163,7 +172,6 @@ export const Sidebar = () => {
           sidebarOpen ? "w-64" : "w-16"
         }`}
       >
-        {/* Dekorasi gradient & bentuk abstrak */}
         <div className="absolute inset-0 bg-linear-to-b from-primary via-primary to-slate-900 opacity-95" />
         <div className="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-accent/20 blur-3xl" />
         <div className="absolute -bottom-24 -left-16 w-48 h-48 rounded-full bg-secondary/20 blur-3xl" />
@@ -176,7 +184,6 @@ export const Sidebar = () => {
           }}
         />
 
-        {/* Konten */}
         <div className="relative z-10 flex flex-col h-full">
           <div className="flex items-center gap-3 p-4 border-b border-white/10">
             <div className="bg-white p-2 rounded-lg shrink-0 shadow-lg">
@@ -228,7 +235,7 @@ export const Sidebar = () => {
               className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-colors text-sm"
             >
               <Menu size={20} className="shrink-0" />
-              {sidebarOpen && <span>Minimize</span>}
+              {sidebarOpen && <span>Ciutkan</span>}
             </button>
             <button
               onClick={runLogoutProcess}
@@ -245,7 +252,6 @@ export const Sidebar = () => {
       {logoutModalOpen && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
-            {/* Header */}
             <div className="text-center mb-8">
               <h3 className="text-xl font-bold text-slate-800">
                 Proses Keluar
@@ -258,10 +264,12 @@ export const Sidebar = () => {
             </div>
 
             {logoutStatus === "success" ? (
-              /* Sukses */
               <div className="flex flex-col items-center py-4">
                 <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mb-4">
-                  <CheckCircle2 size={44} className="text-green-600" />
+                  <CheckCircle2
+                    size={44}
+                    className="text-green-600"
+                  />
                 </div>
                 <p className="text-lg font-bold text-green-700 text-center">
                   Berhasil Keluar
@@ -271,7 +279,6 @@ export const Sidebar = () => {
                 </p>
               </div>
             ) : logoutStatus === "error" ? (
-              /* Error */
               <div className="flex flex-col items-center py-4">
                 <div className="w-20 h-20 rounded-full bg-red-100 flex items-center justify-center mb-4">
                   <XCircle size={44} className="text-red-600" />
@@ -297,7 +304,6 @@ export const Sidebar = () => {
                 </div>
               </div>
             ) : (
-              /* Sedang berjalan: daftar tahapan */
               <div className="space-y-5">
                 {LOGOUT_STEP_ORDER.map((stepKey, index) => {
                   const config = LOGOUT_STEP_CONFIG[stepKey];
@@ -306,7 +312,10 @@ export const Sidebar = () => {
                   const isActive = index === logoutStepIndex;
 
                   return (
-                    <div key={stepKey} className="flex items-center gap-4">
+                    <div
+                      key={stepKey}
+                      className="flex items-center gap-4"
+                    >
                       <div
                         className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 transition-colors ${
                           isDone
@@ -319,12 +328,14 @@ export const Sidebar = () => {
                         {isDone ? (
                           <CheckCircle2 size={22} />
                         ) : isActive ? (
-                          <Loader2 size={22} className="animate-spin" />
+                          <Loader2
+                            size={22}
+                            className="animate-spin"
+                          />
                         ) : (
                           <Icon size={20} />
                         )}
                       </div>
-
                       <div className="flex-1">
                         <p
                           className={`font-semibold text-sm ${
@@ -346,15 +357,14 @@ export const Sidebar = () => {
                     </div>
                   );
                 })}
-
-                {/* Progress bar keseluruhan */}
                 <div className="pt-2">
                   <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                     <div
                       className="h-full bg-accent transition-all duration-700 ease-linear"
                       style={{
                         width: `${
-                          ((logoutStepIndex + 1) / LOGOUT_STEP_ORDER.length) *
+                          ((logoutStepIndex + 1) /
+                            LOGOUT_STEP_ORDER.length) *
                           100
                         }%`,
                       }}

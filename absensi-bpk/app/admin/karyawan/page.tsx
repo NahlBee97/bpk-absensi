@@ -491,7 +491,7 @@ export default function AdminKaryawanPage() {
                   value={employeeForm.nama}
                   onChange={handleEmployeeFormChange}
                   required
-                  className="w-full px-3 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
+                  className="w-full text-slate-700 px-3 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
                 />
               </div>
 
@@ -512,7 +512,7 @@ export default function AdminKaryawanPage() {
                   onChange={handleEmployeeFormChange}
                   required={!editingEmployee}
                   placeholder={editingEmployee ? "••••••••" : ""}
-                  className="w-full px-3 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
+                  className="w-full text-slate-700 px-3 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
                 />
               </div>
 
@@ -524,7 +524,7 @@ export default function AdminKaryawanPage() {
                   name="role"
                   value={employeeForm.role}
                   onChange={handleEmployeeFormChange}
-                  className="w-full px-3 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all bg-white"
+                  className="w-full text-slate-700 px-3 py-2.5 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all bg-white"
                 >
                   {ROLE_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
