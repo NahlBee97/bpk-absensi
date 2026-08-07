@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
+import bcrypt from "bcryptjs"; // Import bcryptjs
 
 // Fungsi format log transaksi (Memastikan setiap kata diawali huruf kapital)
 const formatTitleCase = (str: string) => {
@@ -17,8 +18,17 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { username, password, type, foto } = body;
 
+    // Validasi input dasar
+    if (!username || !password) {
+      return NextResponse.json(
+        { success: false, message: "Username dan Password wajib diisi!" },
+        { status: 400 },
+      );
+    }
+
+    // Cari user berdasarkan nama (username) saja terlebih dahulu
     const user = await prisma.users.findFirst({
-      where: { nama: username, password },
+      where: { nama: username },
     });
 
     if (!user) {
@@ -28,11 +38,21 @@ export async function POST(request: Request) {
       );
     }
 
+    // Verifikasi password menggunakan bcrypt.compare
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      return NextResponse.json(
+        { success: false, message: "Username atau Password salah!" },
+        { status: 401 },
+      );
+    }
+
     // -- LOGIKA PENYIMPANAN FOTO FISIK --
     let fotoPath = "";
     if (foto) {
-      // Hilangkan header data base64
-      const base64Data = foto.replace(/^data:image\/jpeg;base64,/, "");
+      // Hilangkan header data base64 (mendukung format jpeg/png)
+      const base64Data = foto.replace(/^data:image\/\w+;base64,/, "");
 
       // Buat nama file unik (Contoh: in-admin-1701234567.jpg)
       const fileName = `${type}-${username}-${Date.now()}.jpg`;
@@ -53,7 +73,6 @@ export async function POST(request: Request) {
 
     // -- LOGIKA DATABASE --
     if (type === "in") {
-      // PERBAIKAN: Ubah karyawanId menjadi userId
       const absenAktif = await prisma.absensi.findFirst({
         where: { userId: user.id, waktuKeluar: null },
       });
@@ -112,7 +131,6 @@ export async function POST(request: Request) {
       { status: 400 },
     );
   } catch (error) {
-    // PERBAIKAN: Tambahkan console.error agar jika crash, error aslinya terlihat di terminal
     console.error("API Absen Error:", error);
 
     return NextResponse.json(

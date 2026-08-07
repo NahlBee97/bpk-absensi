@@ -1,16 +1,7 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { getAdminSession } from "@/lib/auth";
 
 export async function GET() {
-  try {
-    const cookieStore = await cookies();
-    const isLogin = cookieStore.has("admin_token");
-
-    return NextResponse.json({ isLogin: isLogin }, { status: 200 });
-  } catch (error) {
-    // Membantu Anda melihat jika ada error di terminal
-    console.error("Gagal mengecek cookie:", error);
-
-    return NextResponse.json({ isLogin: false }, { status: 500 });
-  }
+  const session = await getAdminSession();
+  return NextResponse.json({ isLogin: !!session }, { status: 200 });
 }

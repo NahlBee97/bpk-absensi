@@ -1,10 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getAdminSession, unauthorizedAdminResponse } from "@/lib/auth";
+import bcrypt from "bcryptjs"; // Import bcryptjs
 
 // ==========================================
 // 1. GET - READ (Membaca Data)
 // ==========================================
 export async function GET(request: Request) {
+  const session = await getAdminSession();
+  if (!session) return unauthorizedAdminResponse();
+
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
@@ -44,6 +49,9 @@ export async function GET(request: Request) {
 // 2. POST - CREATE (Membuat Data Baru)
 // ==========================================
 export async function POST(request: Request) {
+  const session = await getAdminSession();
+  if (!session) return unauthorizedAdminResponse();
+
   try {
     const body = await request.json();
     const { nama, password, role } = body;
@@ -56,11 +64,14 @@ export async function POST(request: Request) {
       );
     }
 
+    // Hash password sebelum disimpan (angka 10 adalah salt rounds)
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     // Simpan ke database
     const newUser = await prisma.users.create({
       data: {
         nama: nama,
-        password: password,
+        password: hashedPassword, // Simpan password yang sudah di-hash
         role: role || "user", // Jika role tidak dikirim, otomatis jadi "user"
       },
     });
@@ -86,8 +97,10 @@ export async function POST(request: Request) {
 // 3. PUT - UPDATE (Memperbarui Data)
 // ==========================================
 export async function PUT(request: Request) {
+  const session = await getAdminSession();
+  if (!session) return unauthorizedAdminResponse();
+
   try {
-    // Ambil id dari dynamic route params
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
     const body = await request.json();
@@ -100,14 +113,20 @@ export async function PUT(request: Request) {
       );
     }
 
+    // Siapkan data yang akan di-update
+    const updateData: any = {};
+    if (nama) updateData.nama = nama;
+    if (role) updateData.role = role;
+
+    // Jika password ikut dikirim dari frontend, hash terlebih dahulu
+    if (password) {
+      updateData.password = await bcrypt.hash(password, 10);
+    }
+
     // Update data (hanya update field yang dikirim dari frontend)
     const updatedUser = await prisma.users.update({
       where: { id: parseInt(id) },
-      data: {
-        ...(nama && { nama }),
-        ...(password && { password }),
-        ...(role && { role }),
-      },
+      data: updateData,
     });
 
     return NextResponse.json({
@@ -131,8 +150,10 @@ export async function PUT(request: Request) {
 // 4. DELETE - DELETE (Menghapus Data)
 // ==========================================
 export async function DELETE(request: Request) {
+  const session = await getAdminSession();
+  if (!session) return unauthorizedAdminResponse();
+
   try {
-    // Kita menangkap ID dari URL (contoh: /api/users?id=1) agar seragam dengan GET
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id");
 

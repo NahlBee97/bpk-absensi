@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { SignJWT } from "jose";
 import { cookies } from "next/headers";
+import { compare } from "bcryptjs";
 
 // Kunci rahasia untuk enkripsi (Bisa Anda pindahkan ke .env nanti)
 const secretKey = new TextEncoder().encode(
@@ -13,10 +14,9 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { username, password } = body;
 
-    // 1. Cari user di database
-    // Catatan: Sesuaikan 'prisma.user' atau 'prisma.users' dengan nama model Anda
+    // 1. Cari user di database berdasarkan username saja
     const user = await prisma.users.findFirst({
-      where: { nama: username, password: password },
+      where: { nama: username },
     });
 
     if (!user) {
@@ -26,7 +26,16 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2. Pastikan role-nya adalah admin
+    // 2. Bandingkan password menggunakan bcrypt
+    const passwordMatches = await compare(password, user.password);
+    if (!passwordMatches) {
+      return NextResponse.json(
+        { success: false, message: "Username atau Password salah!" },
+        { status: 401 },
+      );
+    }
+
+    // 3. Pastikan role-nya adalah admin
     if (user.role !== "admin") {
       return NextResponse.json(
         { success: false, message: "Akses ditolak! Anda bukan Admin." },
