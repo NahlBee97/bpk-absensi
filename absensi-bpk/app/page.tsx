@@ -131,7 +131,11 @@ export default function Main() {
   });
 
   // ================= PROSES ABSEN (MODAL BERTAHAP) =================
-  const runAbsenProcess = async (type: string, username: string, password: string) => {
+  const runAbsenProcess = async (
+    type: string,
+    username: string,
+    password: string,
+  ) => {
     const runId = ++processRunId.current;
 
     setProcessStatus("processing");
@@ -145,7 +149,9 @@ export default function Main() {
     if (!fotoBase64) {
       if (runId !== processRunId.current) return;
       setProcessStatus("error");
-      setResultMessage("Gagal mengakses kamera. Pastikan izin kamera diaktifkan.");
+      setResultMessage(
+        "Gagal mengakses kamera. Pastikan izin kamera diaktifkan.",
+      );
       return;
     }
 
@@ -160,8 +166,7 @@ export default function Main() {
       .then((res) => ({ ok: true as const, data: res.data }))
       .catch((err) => ({
         ok: false as const,
-        message:
-          err?.response?.data?.message || "Gagal terhubung ke server",
+        message: err?.response?.data?.message || "Gagal terhubung ke server",
       }));
 
     try {
@@ -253,13 +258,20 @@ export default function Main() {
 
         {/* Konten */}
         <div className="relative z-10 flex flex-col h-full min-h-0">
-          <div className="mb-4 shrink-0">
-            <h1 className="text-2xl font-extrabold tracking-tight text-white">
-              CV. BISNIS PRO KOMPUTAMA
-            </h1>
-            <p className="text-base italic font-semibold mt-1 text-accent">
-              Support All of Your Needs
-            </p>
+          <div className="mb-4 shrink-0 flex items-center gap-2">
+            <img
+              className="w-16 h-16 rounded"
+              src="/logo.png"
+              alt="Logo"
+            />
+            <div>
+              <h1 className="text-2xl font-extrabold tracking-tight text-white">
+                CV. BISNIS PRO KOMPUTAMA
+              </h1>
+              <p className="text-base italic font-semibold mt-1 text-accent">
+                Support All of Your Needs
+              </p>
+            </div>
           </div>
 
           <div className="grow flex flex-col items-center justify-center text-center min-h-0 overflow-y-auto py-2 gap-4">

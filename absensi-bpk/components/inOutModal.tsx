@@ -31,15 +31,12 @@ export const InOutModal = ({
           <p className="text-sm text-slate-500 mb-4">
             {formatTitleCase(selectedRow.nama || selectedRow.name)} —{" "}
             {selectedRow.waktuMasuk
-              ? new Date(selectedRow.waktuMasuk).toLocaleDateString(
-                  "id-ID",
-                  {
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  },
-                )
+              ? new Date(selectedRow.waktuMasuk).toLocaleDateString("id-ID", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })
               : "-"}
           </p>
 
@@ -57,9 +54,7 @@ export const InOutModal = ({
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="text-xs text-slate-400">
-                    Tidak ada foto
-                  </span>
+                  <span className="text-xs text-slate-400">Tidak ada foto</span>
                 )}
               </div>
             </div>
@@ -77,9 +72,7 @@ export const InOutModal = ({
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="text-xs text-slate-400">
-                    Tidak ada foto
-                  </span>
+                  <span className="text-xs text-slate-400">Tidak ada foto</span>
                 )}
               </div>
             </div>

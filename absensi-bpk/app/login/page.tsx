@@ -209,13 +209,16 @@ export default function Login() {
 
         {/* Konten */}
         <div className="relative z-10 flex flex-col h-full min-h-0">
-          <div className="mb-4 shrink-0">
-            <h1 className="text-2xl font-extrabold tracking-tight text-white">
-              CV. BISNIS PRO KOMPUTAMA
-            </h1>
-            <p className="text-base italic font-semibold mt-1 text-accent">
-              Support All of Your Needs
-            </p>
+          <div className="mb-4 shrink-0 flex items-center gap-2">
+            <img className="w-16 h-16 rounded" src="/logo.png" alt="Logo" />
+            <div>
+              <h1 className="text-2xl font-extrabold tracking-tight text-white">
+                CV. BISNIS PRO KOMPUTAMA
+              </h1>
+              <p className="text-base italic font-semibold mt-1 text-accent">
+                Support All of Your Needs
+              </p>
+            </div>
           </div>
 
           <div className="grow flex flex-col items-center justify-center text-center min-h-0 overflow-y-auto py-2">

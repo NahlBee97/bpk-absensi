@@ -186,10 +186,8 @@ export const Sidebar = () => {
 
         <div className="relative z-10 flex flex-col h-full">
           <div className="flex items-center gap-3 p-4 border-b border-white/10">
-            <div className="bg-white p-2 rounded-lg shrink-0 shadow-lg">
-              <div className="w-8 h-8 font-bold text-center leading-8 rounded text-primary border-2 border-accent">
-                BP
-              </div>
+            <div className="bg-white p-1 rounded-lg shrink-0 shadow-lg">
+              <img className="w-8 h-8 rounded" src="/logo.png" alt="Logo" />
             </div>
             {sidebarOpen && (
               <div className="overflow-hidden">
@@ -235,7 +233,7 @@ export const Sidebar = () => {
               className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-white/80 hover:bg-white/10 hover:text-white transition-colors text-sm"
             >
               <Menu size={20} className="shrink-0" />
-              {sidebarOpen && <span>Ciutkan</span>}
+              {sidebarOpen && <span>Minimize</span>}
             </button>
             <button
               onClick={runLogoutProcess}
@@ -266,10 +264,7 @@ export const Sidebar = () => {
             {logoutStatus === "success" ? (
               <div className="flex flex-col items-center py-4">
                 <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mb-4">
-                  <CheckCircle2
-                    size={44}
-                    className="text-green-600"
-                  />
+                  <CheckCircle2 size={44} className="text-green-600" />
                 </div>
                 <p className="text-lg font-bold text-green-700 text-center">
                   Berhasil Keluar
@@ -312,10 +307,7 @@ export const Sidebar = () => {
                   const isActive = index === logoutStepIndex;
 
                   return (
-                    <div
-                      key={stepKey}
-                      className="flex items-center gap-4"
-                    >
+                    <div key={stepKey} className="flex items-center gap-4">
                       <div
                         className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 transition-colors ${
                           isDone
@@ -328,10 +320,7 @@ export const Sidebar = () => {
                         {isDone ? (
                           <CheckCircle2 size={22} />
                         ) : isActive ? (
-                          <Loader2
-                            size={22}
-                            className="animate-spin"
-                          />
+                          <Loader2 size={22} className="animate-spin" />
                         ) : (
                           <Icon size={20} />
                         )}
@@ -363,8 +352,7 @@ export const Sidebar = () => {
                       className="h-full bg-accent transition-all duration-700 ease-linear"
                       style={{
                         width: `${
-                          ((logoutStepIndex + 1) /
-                            LOGOUT_STEP_ORDER.length) *
+                          ((logoutStepIndex + 1) / LOGOUT_STEP_ORDER.length) *
                           100
                         }%`,
                       }}
